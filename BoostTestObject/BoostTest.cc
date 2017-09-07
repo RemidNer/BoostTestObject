@@ -32,6 +32,16 @@ public:
 	}
 };
 
+template<typename T>
+void print(T &tok)
+{
+	for (BOOST_AUTO(pos,tok.begin()); pos != tok.end(); ++pos)
+	{
+		cout << " Pos Cotent: " << *pos;
+	}
+	cout << endl;
+}
+
 void case1()
 {
 	//shared_ptr、make_shared的使用，避免使用new、delete造成的内存问题
@@ -258,15 +268,77 @@ void case13()
 
 	tokenizer<> tok(str);			//使用缺省模版参数创建分词对象
 									//此时是默认使用空格、标点符号进行字符分词
+	print(tok);
+}
 
-	for (BOOST_AUTO(pos,tok.begin());pos != tok.end();++pos)
-	{
-		cout << " Pos Content: " << *pos << endl;
-	}
+void case14()
+{
+	//char_separator()
+	char *str = "Link ;; <master-sword> zelda";
+
+	char_separator<char> seq;			//一个char_separator对象
+	tokenizer < char_separator<char>, char*> tok(str, str + strlen(str), seq); //传入char_separator构造分词对象
+	cout << "tokenizer: " << endl;
+	print(tok);							//分词并输出
+
+	tok.assign(str, str + strlen(str), char_separator<char>(" ;-","<>"));	//重新分词
+	cout << "tok.assign: " << endl;
+	print(tok);
+
+	tok.assign(str, str + strlen(str), char_separator<char>(" ;-<>", "", keep_empty_tokens));
+	/************************************************************************/
+	/* use "drop_empty_tokens" 凡是字符集合中出现的字符都不会打印显示出来
+	/* use "keep_empty_tokens" 凡是字符结合中出现的字符都会以空格形式打印
+	/************************************************************************/
+	cout << "Twocie Assign: " << endl;
+	print(tok);
+}
+
+void case15()
+{
+	//escaped_list_separator()
+	string str = "id,100,name,\"mario\"";
+
+	escaped_list_separator<char> seq;
+	tokenizer<escaped_list_separator<char>> tok(str, seq);
+	print(tok);
+	/************************************************************************/
+	/* 输出结果：
+	/* Pos Cotent : id
+	/* Pos Cotent : 100
+	/* Pos Cotent : name
+	/* Pos Cotent : mario
+	/* 请按任意键继续. . .
+	/************************************************************************/
+}
+
+void case16()
+{
+	//offset_separator
+	string str = "2233344445";
+	int offsets[] = { 2,3,4 };
+	offset_separator seq(offsets, offsets + 3, true, true);
+	tokenizer<offset_separator> tok(str, seq);
+	print(tok);
+
+	tok.assign(str, offset_separator(offsets, offsets + 3, false));
+	print(tok);
+
+	str += "56667";
+	tok.assign(str, offset_separator(offsets, offsets + 3, true, false));
+	print(tok);
+
+	/************************************************************************/
+	/* 输出结果：
+	/* Pos Cotent: 22 Pos Cotent: 333 Pos Cotent: 4444 Pos Cotent: 5
+	/* Pos Cotent: 22 Pos Cotent: 333 Pos Cotent: 4444
+	/* Pos Cotent: 22 Pos Cotent: 333 Pos Cotent: 4444 Pos Cotent: 55 Pos Cotent: 666
+	/* 请按任意键继续. . .*/
+	/************************************************************************/
 }
 
 int main()
 {
-	case13();
+	case16();
 	system("pause");
 }
